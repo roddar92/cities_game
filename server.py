@@ -2,6 +2,14 @@
 import random
 from collections import defaultdict
 
+from flask import Flask, render_template, redirect
+from flask import request
+
+
+app = Flask(__name__, template_folder='templates')
+HOST = "0.0.0.0"
+PORT = 5100
+
 
 class CitiesGameException(Exception):
     def __init__(self, msg):
@@ -31,9 +39,9 @@ class Game(object):
         self.__allowed_cities = defaultdict(list)
         self.__guessed_cities = set()
         self.__previous_city = None
-        self.status = "init"
+        self.__status = "init"
 
-        with open("../resources/ru_cities.txt", "r", encoding='utf-8') as f:
+        with open("resources/ru_cities.txt", "r", encoding='utf-8') as f:
             for city in f:
                 city = city.strip()
                 if city:
@@ -55,7 +63,7 @@ class Game(object):
     def __is_cities_exausted(self, letter):
         return self.__allowed_cities[letter] == []
 
-    def __is_all_cities_exausted(self):
+    def is_all_cities_exausted(self):
         return not self.__allowed_cities
 
     def __find_index_of_right_letter(self, previous_city):
@@ -84,14 +92,14 @@ class Game(object):
         if len(self.__allowed_cities[city[0]]) == 0:
             del self.__allowed_cities[city[0]]
 
-    def __check_city(self, city):
+    def check_city_correctness(self, city):
         if city in self.__guessed_cities:
             raise CitiesGameException(random.choice(self.USED_CITY))
         elif city[0] not in self.__allowed_cities or city not in self.__allowed_cities[city[0]]:
             raise CitiesGameException(random.choice(self.UNKNOWN_CITY))
         elif not self.__check_rules(city):
-            l = self.__get_right_letter_by_rules(self.__get_last_city()).upper()
-            raise CitiesGameException(f"Этот город не начинается с буквы \'{l}\'!")
+            letter = self.__get_right_letter_by_rules(self.__get_last_city()).upper()
+            raise CitiesGameException(f"Этот город не начинается с буквы \'{letter}\'!")
         else:
             self.__make_city_used(city)
 
@@ -99,32 +107,44 @@ class Game(object):
         last_letter = self.__get_right_letter_by_rules(self.__get_last_city())
         city = random.choice(self.__allowed_cities[last_letter])
         self.__make_city_used(city)
-        print(self.get_city_name(city))
-
-    def check_and_move(self, city):
-        if city.lower() in self.BYE_PHRASES:
-            self.status = "over"
-        else:
-            self.__check_city(s)
-            self.status = "over" if self.__is_all_cities_exausted() else "proceed"
-            self.move()
+        return self.get_city_name(city)
 
     def is_over(self):
-        return self.status == "over"
+        return self.__status == "over"
+
+    def set_status(self, value):
+        self.__status = value
+
+    def get_status(self):
+        return self.__status
 
 
-if __name__ == "__main__":
-    game = Game()
-    s = input("Приветствую!\nНачинай игру первым и введи город:\n").lower()
-    while True:
+@app.route("/game", methods=['POST', 'GET'])
+def game():
+    if request.method == 'POST':
+        city = request.form['city'].strip().lower()
         try:
-            game.check_and_move(s)
-
-            if game.is_over():
-                print("Пока-пока! До новых встреч!")
-                break
-
-            s = input().lower()
+            if city in city_game.BYE_PHRASES:
+                city_game.set_status("over")
+                # TODO redirect to home page with another text
+                # 'Пока-пока! До новых встреч!'
+                return redirect('/')
+            else:
+                city_game.check_city_correctness(city)
+                game_status = "over" if city_game.is_all_cities_exausted() else "proceed"
+                city_game.set_status(game_status)
+                text = city_game.move()
         except Exception as e:
-            print(e)
-            s = input().lower()
+            text = e
+        return render_template('game.html', data={'value': text})
+    else:
+        return render_template('game.html', data={'value': 'Начинай игру первым и вводи город:'})
+
+
+@app.route("/")
+def home():
+    return render_template('index.html', data={'greeting': 'Приветствую!'})
+
+
+city_game = Game()
+app.run(host=HOST, port=PORT)

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Игра в города</title>
+    <script type="text/javascript">
+    function get_city() {
+        var input = document.getElementById('city').value();
+            input.addEventListener("keyup", function(event) {
+             if (event.keyCode === 13) {
+                 document.getElementById('cityform').submit();
+                 return false;
+             }
+        });
+    }
+    </script>
+</head>
+<body>
+<div id="cityname">
+    <p>{{data['value']}}</p>
+</div>
+<form onsubmit="get_city()" id="cityform" action="/game" method="post">
+    <input type="text" id="city" name="city" value=""/>
+</form>
+</body>
+</html>
