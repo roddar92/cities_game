@@ -2,10 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
     <title>Игра в города</title>
 </head>
 <body>
-<p>{{data['greeting']}}</p>
-<button type="button" onclick="window.location.href='{{ url_for('game') }}';">Начать игру!</button>
+<div id="maindiv">
+    <img src="{{ url_for('static', filename='images/1675621696_grizly-club-p-peterburg-kliparti-17.png') }}"
+         alt="Piter panoram" />
+    <div id="paragraph">
+        <p>{{data['greeting']}}</p>
+    </div>
+    <button type="button" onclick="window.location.href='{{ url_for('game') }}';">Начать игру!</button>
+</div>
 </body>
 </html>

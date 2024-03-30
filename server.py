@@ -6,7 +6,7 @@ from flask import Flask, render_template, redirect
 from flask import request
 
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__, template_folder='templates', static_folder='static')
 HOST = "0.0.0.0"
 PORT = 5100
 
@@ -32,10 +32,12 @@ class Game(object):
         "хватит",
         "устал",
         "надоело",
-        "отстань"
+        "отстань",
+        "пока-пока",
+        "всё"
     ]
 
-    def __init__(self):
+    def init_game(self):
         self.__allowed_cities = defaultdict(list)
         self.__guessed_cities = set()
         self.__previous_city = None
@@ -118,6 +120,11 @@ class Game(object):
     def get_status(self):
         return self.__status
 
+    def clean(self):
+        for city in self.__guessed_cities:
+            self.__allowed_cities[city[0]].append(city)
+        self.__guessed_cities.clear()
+
 
 @app.route("/game", methods=['POST', 'GET'])
 def game():
@@ -143,6 +150,7 @@ def game():
 
 @app.route("/")
 def home():
+    city_game.init_game()
     return render_template('index.html', data={'greeting': 'Приветствую!'})
 
 

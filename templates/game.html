@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
     <title>Игра в города</title>
     <script type="text/javascript">
     function get_city() {
@@ -16,11 +17,15 @@
     </script>
 </head>
 <body>
-<div id="cityname">
-    <p>{{data['value']}}</p>
+<div id="maindiv">
+    <img src="{{ url_for('static', filename='images/1675621696_grizly-club-p-peterburg-kliparti-17.png') }}"
+         alt="Piter panoram" />
+    <div id="paragraph">
+        <p>{{data['value']}}</p>
+    </div>
+    <form onsubmit="get_city()" id="cityform" action="/game" method="post">
+        <input type="text" id="city" name="city" value=""/>
+    </form>
 </div>
-<form onsubmit="get_city()" id="cityform" action="/game" method="post">
-    <input type="text" id="city" name="city" value=""/>
-</form>
 </body>
 </html>
