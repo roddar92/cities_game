@@ -7,7 +7,7 @@ from flask import request
 
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
-HOST = "0.0.0.0"
+HOST = '0.0.0.0'
 PORT = 5100
 
 
@@ -37,7 +37,7 @@ class Game(object):
         "всё"
     ]
 
-    def init_game(self):
+    def __init__(self):
         self.__allowed_cities = defaultdict(list)
         self.__guessed_cities = set()
         self.__previous_city = None
@@ -48,6 +48,10 @@ class Game(object):
                 city = city.strip()
                 if city:
                     self.__allowed_cities[city[0]].append(city)
+
+    def init_game(self):
+        self.__previous_city = None
+        self.__status = "init"
 
     @staticmethod
     def get_city_name(city):
@@ -101,7 +105,7 @@ class Game(object):
             raise CitiesGameException(random.choice(self.UNKNOWN_CITY))
         elif not self.__check_rules(city):
             letter = self.__get_right_letter_by_rules(self.__get_last_city()).upper()
-            raise CitiesGameException(f"Этот город не начинается с буквы \'{letter}\'!")
+            raise CitiesGameException(f"Твой город должен начинаться с буквы \'{letter}\'!")
         else:
             self.__make_city_used(city)
 
@@ -134,11 +138,13 @@ def game():
             if city in city_game.BYE_PHRASES:
                 city_game.set_status("over")
                 # TODO redirect to home page with another text
-                # 'Пока-пока! До новых встреч!'
+                # greeting = 'Пока-пока! Хочешь сыграть ещё раз?'
+
+                city_game.clean()
                 return redirect('/')
             else:
                 city_game.check_city_correctness(city)
-                game_status = "over" if city_game.is_all_cities_exausted() else "proceed"
+                game_status = 'over' if city_game.is_all_cities_exausted() else 'proceed'
                 city_game.set_status(game_status)
                 text = city_game.move()
         except Exception as e:
@@ -149,10 +155,12 @@ def game():
 
 
 @app.route("/")
-def home():
+def index():
     city_game.init_game()
-    return render_template('index.html', data={'greeting': 'Приветствую!'})
+    greeting = 'Приветствую!'
+    return render_template('index.html', data={'greeting': greeting})
 
 
-city_game = Game()
-app.run(host=HOST, port=PORT)
+if __name__ == '__main__':
+    city_game = Game()
+    app.run(host=HOST, port=PORT)
