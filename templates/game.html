@@ -21,7 +21,7 @@
     <img src="https://grizly.club/uploads/posts/2023-02/1675621696_grizly-club-p-peterburg-kliparti-17.png"
          alt="Piter panoram" />
     <div id="paragraph">
-        <p>{{data['value']}}</p>
+        <p class="{{data['cls']}}">{{data['value']}}</p>
     </div>
     <form onsubmit="get_city()" id="cityform" action="/game" method="post">
         <input type="text" id="city" name="city" value=""/>

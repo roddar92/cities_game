@@ -147,11 +147,14 @@ def game():
                 game_status = 'over' if city_game.is_all_cities_exausted() else 'proceed'
                 city_game.set_status(game_status)
                 text = city_game.move()
+                cls = 'n'
         except Exception as e:
             text = e
-        return render_template('game.html', data={'value': text})
+            cls = 'e'
+        return render_template('game.html', data={'value': text, 'cls': cls})
     else:
-        return render_template('game.html', data={'value': 'Начинай игру первым и вводи город:'})
+        cls = 'n'
+        return render_template('game.html', data={'value': 'Начинай игру первым и вводи город:', 'cls': cls})
 
 
 @app.route("/")
